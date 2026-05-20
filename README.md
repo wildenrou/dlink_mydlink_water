@@ -10,21 +10,52 @@ This integration was built from the reverse-engineered flow validated during tes
 4. Poll `POST /me/device/info?access_token=...`.
 5. Parse `change_cache.status_change`.
 
-Known mapping from testing:
+## Device/unit model
 
-- `uid: 0`, `type: 23`, `value: 1` = water leak triggered on the DCH-S162 base unit.
-- `uid: 0`, `type: 15`, `value: 1` = alarm/problem status triggered on the DCH-S162 base unit.
+The paired DCH-S163 remote leak detector is **not** returned as a separate mydlink device. It is returned as a child `unit` inside the parent DCH-S162 payload.
+
+Example:
+
+```json
+"units": [
+  {"uid": 0, "model": "DCH-S162", "status": [15, 17, 23]},
+  {"uid": 1, "model": "DCH-S163", "status": [15, 16, 22]}
+]
+```
+
+The integration therefore creates entities per unit, not only per top-level device.
+
+## Known / inferred status mapping
+
+Validated by live testing:
+
+- `uid: 0`, `model: DCH-S162`, `type: 23`, `value: 1` = water leak triggered on the DCH-S162 base unit.
+- `uid: 0`, `model: DCH-S162`, `type: 15`, `value: 1` = alarm/problem status triggered on the DCH-S162 base unit.
 - `value: 0` = normal/dry.
+
+Inferred for the paired remote unit based on its advertised status capabilities:
+
+- `uid: 1`, `model: DCH-S163`, `type: 22`, `value: 1` = likely water leak triggered on the paired DCH-S163 unit.
+- `uid: 1`, `model: DCH-S163`, `type: 15`, `value: 1` = likely alarm/problem status triggered on the paired DCH-S163 unit.
+
+The DCH-S163 mapping still needs one live trigger test to fully confirm.
 
 ## Entities created
 
-For each discovered DCH-S16x device:
+For each parent DCH-S162 device:
 
-- `binary_sensor.<device>_water_leak`
-- `binary_sensor.<device>_alarm_status`
-- `binary_sensor.<device>_online`
-- `sensor.<device>_last_update`
-- `sensor.<device>_firmware`
+- parent online entity
+- parent firmware sensor
+- parent last update sensor
+
+For each unit inside the parent device:
+
+- DCH-S162 base unit water leak binary sensor
+- DCH-S162 base unit alarm/problem binary sensor
+- DCH-S163 paired unit water leak binary sensor
+- DCH-S163 paired unit alarm/problem binary sensor
+
+The paired unit should appear as a separate Home Assistant device linked via `via_device` to the parent DCH-S162.
 
 ## Installation
 
@@ -50,5 +81,5 @@ If you pasted your mydlink password or tokens during reverse-engineering/testing
 
 - Cloud polling only.
 - Tested against one DCH-S162 with one paired DCH-S163.
-- The paired DCH-S163 remote unit status mapping is not yet implemented because only the base unit was triggered during validation.
+- The DCH-S163 mapping is inferred from the paired unit's `status` list and should be confirmed by triggering the remote detector.
 - No siren/strobe control yet.
