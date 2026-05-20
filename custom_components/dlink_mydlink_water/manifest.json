@@ -1,0 +1,11 @@
+{
+  "domain": "dlink_mydlink_water",
+  "name": "D-Link mydlink Water Leak Sensors",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}
