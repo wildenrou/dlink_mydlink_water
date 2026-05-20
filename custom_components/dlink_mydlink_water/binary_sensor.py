@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import logging
 from typing import Any
 
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
@@ -12,6 +13,8 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpda
 
 from .api import status_value
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -69,10 +72,22 @@ async def async_setup_entry(
         mydlink_id = str(info["mydlink_id"])
         entities.append(MydlinkParentOnlineSensor(coordinator, mydlink_id))
 
-        for unit in info.get("units") or []:
+        units = info.get("units") or []
+        _LOGGER.debug("Creating mydlink unit sensors for %s: %s", mydlink_id, units)
+        for unit in units:
             model = str(unit.get("model", ""))
-            uid = int(unit.get("uid", 0))
-            for description in UNIT_MODEL_STATUS.get(model, []):
+            try:
+                uid = int(unit.get("uid", 0))
+            except (TypeError, ValueError):
+                _LOGGER.warning("Skipping mydlink unit with invalid uid: %s", unit)
+                continue
+
+            descriptions = UNIT_MODEL_STATUS.get(model, [])
+            if not descriptions:
+                _LOGGER.debug("No known status mapping for mydlink unit model %s: %s", model, unit)
+                continue
+
+            for description in descriptions:
                 entities.append(MydlinkUnitStatusSensor(coordinator, mydlink_id, uid, description))
 
     async_add_entities(entities)
@@ -185,8 +200,9 @@ class MydlinkUnitStatusSensor(CoordinatorEntity[DataUpdateCoordinator], BinarySe
     def device_info(self):
         info = self._info or {}
         unit = self._unit or {}
+        unit_identifier = f"{self._mydlink_id}_uid{self._uid}"
         return {
-            "identifiers": {(DOMAIN, self._mydlink_id, str(self._uid))},
+            "identifiers": {(DOMAIN, unit_identifier)},
             "name": _unit_name(info, self._uid) if info else f"mydlink Unit {self._uid}",
             "manufacturer": "D-Link",
             "model": unit.get("model") or info.get("device_model"),
