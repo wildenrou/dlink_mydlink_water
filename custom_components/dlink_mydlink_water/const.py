@@ -1,0 +1,17 @@
+DOMAIN = "dlink_mydlink_water"
+
+CONF_EMAIL = "email"
+CONF_PASSWORD = "password"
+CONF_ANDROID_ID = "android_id"
+CONF_DEVICE_NAME = "device_name"
+CONF_SCAN_INTERVAL = "scan_interval"
+
+DEFAULT_ANDROID_ID = "a1b2c3d4e5f67890"
+DEFAULT_DEVICE_NAME = "Pixel 7"
+DEFAULT_SCAN_INTERVAL = 30
+MIN_SCAN_INTERVAL = 15
+
+ANDROID_CLIENT_ID = "521ea1890143662c7597864ffb6fc816"
+ANDROID_PRIVILEGE_KEY = "82aac78b6d02239942afd8fe9b3c6d22"
+REDIRECT_URI = "https://www.mydlink.com"
+BOOTSTRAP_HOST = "api.auto.mydlink.com"
