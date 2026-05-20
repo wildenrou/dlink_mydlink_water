@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "D-Link mydlink Water Leak Sensors",
+        "description": "Enter your mydlink account credentials. Change your mydlink password first if it was exposed during testing.",
+        "data": {
+          "email": "Email",
+          "password": "Password",
+          "android_id": "Android ID / client device ID",
+          "device_name": "Client device name",
+          "scan_interval": "Polling interval in seconds"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not authenticate with mydlink or fetch devices.",
+      "unknown": "Unexpected error. Check Home Assistant logs."
+    },
+    "abort": {
+      "already_configured": "This mydlink account is already configured."
+    }
+  }
+}
