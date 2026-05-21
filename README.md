@@ -2,6 +2,14 @@
 
 Custom integration for polling D-Link mydlink DCH-S162 / DCH-S163 water leak status through the private mydlink cloud API.
 
+## Latest release: v0.1.2
+
+This release fixes support for paired DCH-S163 child leak detectors.
+
+The DCH-S163 is not returned by mydlink as a separate top-level device. It is exposed as a child `unit` inside the parent DCH-S162 device payload. The integration now creates Home Assistant entities per child unit and uses valid Home Assistant child-device identifiers so the paired DCH-S163 can appear as its own linked device.
+
+## How it works
+
 This integration was built from the reverse-engineered flow validated during testing:
 
 1. Authenticate through `GET /oauth/authorize2`.
@@ -38,7 +46,7 @@ Inferred for the paired remote unit based on its advertised status capabilities:
 - `uid: 1`, `model: DCH-S163`, `type: 22`, `value: 1` = likely water leak triggered on the paired DCH-S163 unit.
 - `uid: 1`, `model: DCH-S163`, `type: 15`, `value: 1` = likely alarm/problem status triggered on the paired DCH-S163 unit.
 
-The DCH-S163 mapping still needs one live trigger test to fully confirm.
+The DCH-S163 leak mapping should still be confirmed by triggering the remote detector once after installation.
 
 ## Entities created
 
@@ -59,6 +67,8 @@ The paired unit should appear as a separate Home Assistant device linked via `vi
 
 ## Installation
 
+### Manual installation
+
 1. Copy `custom_components/dlink_mydlink_water` to Home Assistant:
 
    `/config/custom_components/dlink_mydlink_water`
@@ -72,6 +82,54 @@ The paired unit should appear as a separate Home Assistant device linked via `vi
 5. Enter your mydlink email/password.
 
 Recommended polling interval: `30` seconds.
+
+### HACS custom repository
+
+Add this repository as a HACS custom repository:
+
+```text
+https://github.com/wildenrou/dlink_mydlink_water
+```
+
+Category:
+
+```text
+Integration
+```
+
+Then install/update through HACS and restart Home Assistant.
+
+## Updating from an earlier version
+
+After updating to v0.1.2:
+
+1. Restart Home Assistant fully.
+2. Reloading the integration alone may not be enough for newly-created device/entity registry entries.
+3. Check for a child device corresponding to the DCH-S163 paired unit.
+4. Trigger the paired leak detector once to verify the inferred `uid: 1`, `type: 22` mapping.
+
+## Changelog
+
+### v0.1.2
+
+- Fixed DCH-S163 paired child-device support.
+- The integration now creates binary sensors for each `units[]` entry returned by `/me/device/info`.
+- Fixed invalid Home Assistant child-device identifier format for paired units.
+- Added `via_device` linkage from DCH-S163 child devices to the parent DCH-S162.
+- Kept DCH-S162 base leak mapping as `uid: 0`, `type: 23`.
+- Added inferred DCH-S163 leak mapping as `uid: 1`, `type: 22`.
+
+### v0.1.1
+
+- Added preliminary paired DCH-S163 unit sensor creation.
+- Added debug logging for detected mydlink units.
+
+### v0.1.0
+
+- Initial cloud-polling integration.
+- Added login flow.
+- Added DCH-S162 device discovery.
+- Added DCH-S162 water leak, alarm status, online, last update, and firmware entities.
 
 ## Security warning
 
