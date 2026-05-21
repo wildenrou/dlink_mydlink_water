@@ -221,7 +221,10 @@ class MydlinkUnitStatusSensor(CoordinatorEntity[DataUpdateCoordinator], BinarySe
             return None
         value = status_value(info, self._uid, self._description.status_type)
         if value is None:
-            return None
+            # mydlink only includes the latest changed statuses in change_cache. If a
+            # known leak/alarm status is missing but the unit is present, treat it as
+            # normal/off rather than unknown.
+            return False
         return value == 1
 
     @property
@@ -236,6 +239,7 @@ class MydlinkUnitStatusSensor(CoordinatorEntity[DataUpdateCoordinator], BinarySe
             "sub_id": unit.get("sub_id"),
             "status_type": self._description.status_type,
             "raw_value": value,
+            "assumed_off": value is None,
             "private_ip": info.get("private_ip"),
             "firmware": unit.get("version") or info.get("fw_ver"),
             "raw_change_cache": info.get("change_cache"),
