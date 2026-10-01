@@ -11,6 +11,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import MydlinkApiClient, MydlinkApiError
 from .const import CONF_EMAIL, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .device_migration import async_migrate_child_devices
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     await coordinator.async_config_entry_first_refresh()
+
+    async_migrate_child_devices(hass, entry.entry_id)
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
         "client": client,

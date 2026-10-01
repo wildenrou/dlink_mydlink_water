@@ -2,11 +2,11 @@
 
 Custom integration for polling D-Link mydlink DCH-S162 / DCH-S163 water leak status through the private mydlink cloud API.
 
-## Latest release: v0.1.2
+## Latest release: v0.1.3
 
-This release fixes support for paired DCH-S163 child leak detectors.
+This release fixes duplicate child devices left behind by the device identifier change in v0.1.1 and adds local D-Link branding for Home Assistant 2026.3 and newer.
 
-The DCH-S163 is not returned by mydlink as a separate top-level device. It is exposed as a child `unit` inside the parent DCH-S162 device payload. The integration now creates Home Assistant entities per child unit and uses valid Home Assistant child-device identifiers so the paired DCH-S163 can appear as its own linked device.
+Legacy child devices are migrated automatically before entities load. If a current-format device already exists, the integration keeps it, moves any remaining entities to it, and removes the obsolete device. Entity IDs and unique IDs remain unchanged. New installations keep the current identifier format.
 
 ## How it works
 
@@ -101,14 +101,24 @@ Then install/update through HACS and restart Home Assistant.
 
 ## Updating from an earlier version
 
-After updating to v0.1.2:
+After updating to v0.1.3:
 
-1. Restart Home Assistant fully.
-2. Reloading the integration alone may not be enough for newly-created device/entity registry entries.
-3. Check for a child device corresponding to the DCH-S163 paired unit.
-4. Trigger the paired leak detector once to verify the inferred `uid: 1`, `type: 22` mapping.
+1. Restart Home Assistant fully to load the updated integration and D-Link brand images.
+2. Legacy child devices are migrated automatically after the first successful cloud refresh; no removal or reinstallation of the integration is needed.
+3. Existing entity IDs are preserved. If an obsolete duplicate was referenced directly by a device-based automation, select the remaining active device in that automation.
+4. Refresh the browser if it still displays a cached placeholder logo. Local branding requires Home Assistant 2026.3 or newer.
+
+The migration leaves shared or ambiguous legacy devices untouched and logs a warning for shared devices, so these may require manual review.
 
 ## Changelog
+
+### v0.1.3
+
+- Migrate legacy three-part child identifiers to the current two-part format.
+- Remove obsolete duplicate child devices while preserving entity IDs and recovering missing user settings.
+- Leave parent devices, new installations, and unrelated registry entries unchanged.
+- Move D-Link icons and logos into the supported `brand/` directory for Home Assistant 2026.3 and newer.
+- Add 14 registry regression tests, verified with Home Assistant 2026.5.0.
 
 ### v0.1.2
 

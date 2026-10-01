@@ -1,0 +1,2 @@
+# Home Assistant 2026.5.0, matching the registry API at the time of issue #1.
+pytest-homeassistant-custom-component==0.13.329
